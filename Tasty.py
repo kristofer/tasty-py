@@ -19,20 +19,30 @@ class Tasty:
     # make sure to do an __init__ method
 
     def __init__(self):
-        self.filename = "saved_data.json"
+        self.needs_saving = False
+        self.save_file = "saved_data.json"
         self.tasks = {}
-    
+        self.complete = 0
+        self.unfinished = 0
+        # starting up
+        self.clear()
+        print('Welcome to Tasty. Loading your tasks...')
+        self.load_tasks(self.save_file)
+        self.display_tasks()
 
     def display_tasks(self):
         if self.tasks: 
+            print('Tasks:')
             for task_name, status in self.tasks.items():
                 print("- ", task_name, status)
+            print(f"You have {self.complete} complete tasks. BUT You have {self.unfinished} unfinished tasks.")
         else:
             print("You have no tasks.")
 
     def remove_task(self, task_name):
         if task_name in self.tasks:
             del self.tasks[task_name]
+            self.needs_saving = True
         else:
             print("Task not found.")
 
@@ -42,6 +52,8 @@ class Tasty:
         """
         if task_name not in self.tasks:
             self.tasks[task_name] = "not yet"
+            self.unfinished += 1
+            self.needs_saving = True
         else:
             print("Task already added.")
 
@@ -61,17 +73,40 @@ class Tasty:
 
     def save_tasks(self, filename):
         with open(filename, "w") as fp:
-          json.dump(self.tasks,fp)
+            json.dump(self.tasks,fp)
+            self.needs_saving = False
+
 
     def load_tasks(self, filename):
         with open(filename) as json_file:
             self.tasks = json.load(json_file)
+            self.update_counts()
+            self.needs_saving = False
 
+    def update_counts(self):
+        for task_name, status in self.tasks.items():
+            if status == 'not yet':
+                self.unfinished += 1
+            if status == 'completed':
+                self.complete += 1
+        
     def complete_task(self, task_name):
-        pass
+        if task_name in self.tasks:
+            self.tasks[task_name] = 'completed'
+            self.complete += 1
+            self.unfinished -= 1
+            self.needs_saving = True
+        else:
+            print("Task not found.")
 
     def unfinish_task(self, task_name):
-        pass
+        if task_name in self.tasks:
+            self.tasks[task_name] = 'not yet'
+            self.complete -= 1
+            self.unfinished += 1
+            self.needs_saving = True
+        else:
+            print("Task not found.")
 
     def help(self):
         """
@@ -122,14 +157,20 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         """)
        
     def exit_program(self):
+        if self.needs_saving == True:
+            self.save_tasks(self.save_file)
+            print("*** Saving your work.")
         print('Bye, Felicia.')
         exit()
+
+    def clear(self):
+        os.system('clear')
 
 if __name__ == "__main__":
     tasty = Tasty()
     # tasty.tasks == {}
-    tasty.help()
-
+    # tasty.help()
+    print('Type "help" for commands')
     ## HACKY tests, used before we had a way to get the whole line
     ## split into two parts, Command and Rest (or task_name)
     # tasty.tasks["foo"] = "incomplete"
@@ -147,6 +188,8 @@ if __name__ == "__main__":
             #exit()
         elif command == "help":
             tasty.help()
+        elif command == "clear":
+            tasty.clear()
         elif command == "license":
             tasty.license()
         elif command == "tasks":
@@ -160,9 +203,9 @@ if __name__ == "__main__":
         elif command == 'unfinish':
             tasty.unfinish_task(task_name)
         elif command == 'save':
-            tasty.save_tasks(tasty.filename)
+            tasty.save_tasks(tasty.save_file)
         elif command == 'load':
-            tasty.load_tasks(tasty.filename)
+            tasty.load_tasks(tasty.save_file)
         else:
             print("Unknown command:", command, ' : ', task_name)
     # exit()
