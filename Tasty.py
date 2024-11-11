@@ -19,6 +19,58 @@ class Tasty:
     # make sure to do an __init__ method
 
     def __init__(self):
+        self.filename = "saved_data.json"
+        self.tasks = {}
+    
+
+    def display_tasks(self):
+        if self.tasks: 
+            for task_name, status in self.tasks.items():
+                print("- ", task_name, status)
+        else:
+            print("You have no tasks.")
+
+    def remove_task(self, task_name):
+        if task_name in self.tasks:
+            del self.tasks[task_name]
+        else:
+            print("Task not found.")
+
+    def add_task(self, task_name):
+        """
+        Add a new task to the user tasks.
+        """
+        if task_name not in self.tasks:
+            self.tasks[task_name] = "not yet"
+        else:
+            print("Task already added.")
+
+    def prompt_user(self, prompt):
+        line = input(prompt)
+        #print(line)
+        while not line:
+            line = input(prompt)
+        words = line.split()
+        #print(words)
+        command = words[0]
+        #print(command)
+        rest = words[1:]
+        rest = " ".join(rest)
+        #print(rest)
+        return command, rest
+
+    def save_tasks(self, filename):
+        with open(filename, "w") as fp:
+          json.dump(self.tasks,fp)
+
+    def load_tasks(self, filename):
+        with open(filename) as json_file:
+            self.tasks = json.load(json_file)
+
+    def complete_task(self, task_name):
+        pass
+
+    def unfinish_task(self, task_name):
         pass
 
     def help(self):
@@ -68,18 +120,49 @@ CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         """)
-
+       
+    def exit_program(self):
+        print('Bye, Felicia.')
+        exit()
 
 if __name__ == "__main__":
     tasty = Tasty()
+    # tasty.tasks == {}
     tasty.help()
+
+    ## HACKY tests, used before we had a way to get the whole line
+    ## split into two parts, Command and Rest (or task_name)
+    # tasty.tasks["foo"] = "incomplete"
+    # tasty.add_task("Buy Milk")
+    #tasty.add_task("do something")
+
+    #tasty.remove_task("Buy Milk")
+
     while True:
-        command = input("Tasty> ")
+        command, task_name = tasty.prompt_user("Tasty> ")
         if command == "exit":
-            pass # exit the program, how would you do this?
+            tasty.exit_program() # exit the program, how would you do this?
+            #break
+            # or
+            #exit()
         elif command == "help":
             tasty.help()
         elif command == "license":
             tasty.license()
+        elif command == "tasks":
+            tasty.display_tasks()
+        elif command == 'new':
+            tasty.add_task(task_name)
+        elif command == 'remove':
+            tasty.remove_task(task_name)
+        elif command == 'complete':
+            tasty.complete_task(task_name)
+        elif command == 'unfinish':
+            tasty.unfinish_task(task_name)
+        elif command == 'save':
+            tasty.save_tasks(tasty.filename)
+        elif command == 'load':
+            tasty.load_tasks(tasty.filename)
         else:
-            print("Unknown command")
+            print("Unknown command:", command, ' : ', task_name)
+    # exit()
