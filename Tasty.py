@@ -73,13 +73,15 @@ class Tasty:
 
     def save_tasks(self, filename):
         with open(filename, "w") as fp:
-            json.dump(self.tasks,fp)
+            dict_to_save = { "tasks": self.tasks}
+            json.dump(dict_to_save,fp)
             self.needs_saving = False
 
 
     def load_tasks(self, filename):
         with open(filename) as json_file:
-            self.tasks = json.load(json_file)
+            loaded_dicts = json.load(json_file)
+            self.tasks = loaded_dicts['tasks']
             self.update_counts()
             self.needs_saving = False
 
