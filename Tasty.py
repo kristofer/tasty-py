@@ -43,6 +43,8 @@ class Tasty:
         if task_name in self.tasks:
             del self.tasks[task_name]
             self.needs_saving = True
+            self.update_counts()
+            # need to update the counts
         else:
             print("Task not found.")
 
@@ -67,9 +69,9 @@ class Tasty:
         command = words[0]
         #print(command)
         rest = words[1:]
-        rest = " ".join(rest)
+        restOfLine = " ".join(rest)
         #print(rest)
-        return command, rest
+        return command, restOfLine
 
     def save_tasks(self, filename):
         with open(filename, "w") as fp:
@@ -82,10 +84,14 @@ class Tasty:
         with open(filename) as json_file:
             loaded_dicts = json.load(json_file)
             self.tasks = loaded_dicts['tasks']
+            # self.trash = loaded_dicts['trash']
+            # self.impt = loaded_dicts['impt']
             self.update_counts()
             self.needs_saving = False
 
     def update_counts(self):
+        self.complete = 0
+        self.unfinished = 0
         for task_name, status in self.tasks.items():
             if status == 'not yet':
                 self.unfinished += 1
